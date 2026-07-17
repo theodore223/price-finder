@@ -1,4 +1,4 @@
-# FlohFiyat — Flea Market Price Scanner
+# Price Finder — Flea Market Price Scanner
 
 Point your phone's camera at an item and take a photo → Gemini identifies the
 product and uses Google Search to find its current retail price in Germany plus
