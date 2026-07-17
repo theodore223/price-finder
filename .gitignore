@@ -1,0 +1,31 @@
+# Bağımlılıklar
+node_modules/
+
+# Ortam değişkenleri — API key'ler burada, asla commit etme
+.env
+.env.*
+!.env.example
+
+# Next.js build çıktısı
+.next/
+out/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Vercel proje bağlantısı
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Claude Code yerel ayarları
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
