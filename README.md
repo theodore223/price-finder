@@ -1,51 +1,53 @@
-# FlohFiyat — İkinci El Pazar Fiyat Tarayıcı
+# FlohFiyat — Flea Market Price Scanner
 
-Telefonun kamerasını ürüne tut, foto çek → Gemini ürünü tanır, Google Search ile
-Almanya'daki güncel sıfır fiyatını ve tipik ikinci el aralığını bulur.
+Point your phone's camera at an item and take a photo → Gemini identifies the
+product and uses Google Search to find its current retail price in Germany plus
+a typical second-hand price range.
 
-## Klasörler
+## Folders
 
-- `backend/` — Next.js API proxy (`POST /api/analyze`). Gemini API key sadece burada.
-- `flohfiyat/` — Expo (React Native, TypeScript) mobil uygulama.
+- `backend/` — Next.js API proxy (`POST /api/analyze`). The Gemini API key lives only here.
+- `flohfiyat/` — Expo (React Native, TypeScript) mobile app.
 
-## Backend'i çalıştır / deploy et
+## Run / deploy the backend
 
 ```bash
 cd backend
 
-# Yerel geliştirme — anahtar: https://aistudio.google.com/apikey
+# Local development — get a key at https://aistudio.google.com/apikey
 echo "GEMINI_API_KEY=AIza..." > .env.local
 npm run dev          # http://localhost:3000/api/analyze
 
-# Vercel'e deploy
-npx vercel           # ilk kurulumda projeyi bağla
-npx vercel env add GEMINI_API_KEY   # production için key ekle
+# Deploy to Vercel
+npx vercel           # link the project on first run
+npx vercel env add GEMINI_API_KEY   # add the key for production
 npx vercel --prod
 ```
 
-Not: `/api/analyze` route'unda `maxDuration = 60` ayarlı — Google Search dahil
-analiz 10-40 saniye sürebilir. Daha önce ANTHROPIC_API_KEY eklediysen Vercel'den
-kaldırabilirsin, artık kullanılmıyor.
+Note: the `/api/analyze` route sets `maxDuration = 60` — analysis including
+Google Search can take 10–40 seconds. If you previously added an
+ANTHROPIC_API_KEY on Vercel, you can remove it; it's no longer used.
 
-## Uygulamayı çalıştır
+## Run the app
 
-1. `flohfiyat/config.ts` içindeki `API_URL`'i kendi Vercel URL'inle değiştir.
-   (Yerel test için bilgisayarının LAN IP'si: `http://192.168.x.x:3000/api/analyze` —
-   telefon ve bilgisayar aynı Wi-Fi'da olmalı.)
-2. Başlat:
+1. Replace `API_URL` in `flohfiyat/config.ts` with your own Vercel URL.
+   (For local testing use your computer's LAN IP:
+   `http://192.168.x.x:3000/api/analyze` — phone and computer must be on the
+   same Wi-Fi.)
+2. Start:
 
 ```bash
 cd flohfiyat
 npx expo start
 ```
 
-3. Telefonda **Expo Go** ile QR kodu okut.
+3. Scan the QR code with **Expo Go** on your phone.
 
-## API sözleşmesi
+## API contract
 
-`POST /api/analyze` — gövde: `{ "image": "<base64 jpeg, data URI prefix'siz>" }`
+`POST /api/analyze` — body: `{ "image": "<base64 jpeg, without data URI prefix>" }`
 
-Başarılı yanıt:
+Successful response:
 
 ```json
 {
@@ -57,15 +59,17 @@ Başarılı yanıt:
 }
 ```
 
-Hata yanıtı: `{ "error": "okunabilir Türkçe mesaj" }` (400/429/500/502).
+Error response: `{ "error": "human-readable message (in Turkish)" }` (400/429/500/502).
 
-## Notlar
+## Notes
 
-- Model: `gemini-2.5-flash`, `googleSearch` tool'u açık, tek Gemini çağrısında
-  tanıma + fiyat araştırma. Konum hedefi (Almanya/EUR) prompt'ta belirtiliyor.
-- `googleSearch` açıkken zorunlu JSON modu (`responseMimeType`/`responseSchema`)
-  KULLANILMIYOR — gemini-2.5'te çakışıyor; JSON prompt'la zorlanıp parse ediliyor.
-- Fotoğraf app tarafında 1024px genişliğe küçültülüp jpeg (0.6) olarak yollanır.
-- Fiyatlar yaklaşıktır; kart üstündeki güven rozetine bak.
-- Backend'de TypeScript 5'e sabit kal (`typescript@^5`) — TS 7, Next.js 16
-  build'ini kırıyor.
+- Model: `gemini-2.5-flash` with the `googleSearch` tool enabled — recognition
+  and price research happen in a single Gemini call. The location target
+  (Germany/EUR) is specified in the prompt.
+- Forced JSON mode (`responseMimeType`/`responseSchema`) is NOT used while
+  `googleSearch` is enabled — they conflict on gemini-2.5; JSON is enforced via
+  the prompt and then parsed.
+- The photo is resized to 1024px width on the app side and sent as jpeg (0.6 quality).
+- Prices are approximate; check the confidence badge on the result card.
+- Pin the backend to TypeScript 5 (`typescript@^5`) — TS 7 breaks the
+  Next.js 16 build.
